@@ -1,0 +1,73 @@
+pipeline {
+    agent { label 'master' }
+
+    environment{
+        REPO_SCRIPTS = "https://git.teajay.cc/teajay/FFKW-Jenkins-Scripte"
+        REPO_GLUON = "https://github.com/freifunk-gluon/gluon.git"
+        REPO_SITE = "https://git.teajay.cc/teajay/FFKW-Site-Multidomain.git"
+
+        DIR_SCRIPTS = "scrpt"
+        DATE = sh(returnStdout: true, script: "date '+%Y%m%d-%H%M'").trim()
+        SIGN_SECRET = "/gluon-secret/secret"
+    }
+
+    stages {
+        stage('tmpclean'){
+            steps{
+                echo "########################"
+                echo "#  Cleaning Workspace  #"
+                echo "########################"
+                sh "rm -r -f ./*"
+            }
+        }
+
+        stage('clone') {
+            steps {
+                echo "###################"
+                echo "#  Cloning Repos  #"
+                echo "###################"
+
+
+                echo "Checking out build scripts"
+                dir("${DIR_SCRIPTS}"){
+                    git "${REPO_SCRIPTS}"
+                }
+
+                echo "Checking out gluon version ${VERSION}"
+                sh "git clone ${REPO_GLUON} gluon -b ${VERSION}"
+                
+                echo "Checking out site config"
+                dir("gluon/site"){
+                    sh "git clone ${REPO_SITE} -b ${BRANCH} ."
+                }
+            }
+        }
+
+        stage('build'){
+            steps{
+                dir("gluon"){
+
+					sh """ 
+						make update
+						for TARGET in \$(make list-targets); do
+							 make GLUON_TARGET=\$TARGET GLUON_RELEASE=${VERSION}-wireguard GLUON_BRANCH=${BRANCH} DEFAULT_GLUON_RELEASE=${VERSION}${DATE}
+						done
+                        make manifest GLUON_BRANCH=${BRANCH} GLUON_RELEASE=${VERSION}-wireguard
+                        contrib/sign.sh ${SIGN_SECRET} output/images/sysupgrade/${BRANCH}.manifest
+					"""
+
+                }
+            }
+        }
+
+        stage('clean'){
+            steps{
+                echo "########################"
+                echo "#  Cleaning Workspace  #"
+                echo "########################"
+                //sh "rm -r -f ./*"
+            }
+        }
+
+    }
+}
