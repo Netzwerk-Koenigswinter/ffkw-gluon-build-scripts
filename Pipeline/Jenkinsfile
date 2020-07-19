@@ -46,11 +46,19 @@ pipeline {
 
         stage('config'){
         	steps{
+        		echo "############################"
+                echo "#  Running Config Scripts  #"
+                echo "############################"
+
+
         		script {
         			if($REMOTEKEYS){
+      					
         				$REMOTE_MAINTENANCE = "-remote"
         				sh "${DIR_SCRIPTS}/remote-maintenance/remote-maintenance.pl gluon/site/site.conf"
         				
+        				echo "Remote Maintenance Activated"
+        			
         			}
         		}
 
@@ -59,6 +67,11 @@ pipeline {
         }
 
         stage('build'){
+
+        	echo "##############"
+            echo "#  Building  #"
+            echo "###############"
+
             steps{
                 dir("gluon"){
 
