@@ -12,7 +12,7 @@ my $confPath = $ARGV[0];
 my $fh;
 
 #Reading in Key File
-open($fh, '<:encoding(UTF-8)', $KEYFILE);
+open($fh, '<:encoding(UTF-8)', $KEYFILE) or die "Cannot read File: $!";
 my @keyLines = <$fh>;
 my $keyText = join("", @keyLines);
 
@@ -23,7 +23,7 @@ open($fh, '<:encoding(UTF-8)' , $confPath);
 my @confLines = <$fh>;
 close($fh);
 
-open($fh, '>' , $confPath);
+open($fh, '>' , $confPath) or die "Cannot write File: $!";
 
 foreach my $line (@confLines){
 	print $fh $line;

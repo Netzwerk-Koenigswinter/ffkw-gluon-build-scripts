@@ -18,7 +18,7 @@ chomp @devices;
 close($fh);
 
 #Open the Config Dir and Read in the Files
-opendir my $dir, $confPath or die "Cannot open directory: $!";
+opendir my $dir, $confPath or die "Cannot read Directory: $!";
 my @files = readdir $dir;
 closedir $dir;
 
@@ -29,7 +29,7 @@ foreach my $file (@files){
 	
 	my @lines2Remove;
 
-	open(my $fh2, '<:encoding(UTF-8)', $confPath.$file) or die "Cannot open file: $!";
+	open(my $fh2, '<:encoding(UTF-8)', $confPath.$file) or die "Cannot read file: $!";
 	my @lines = <$fh2>;
 	close($fh2);
 
@@ -54,7 +54,7 @@ foreach my $file (@files){
 	}
 
 	if($#lines2Remove + 1){
-		open(my $fh3, '>', $confPath.$file);
+		open(my $fh3, '>', $confPath.$file) or die "Cannot write File: $!";
 		print $fh3 join("\n", @lines)
 	}
 
