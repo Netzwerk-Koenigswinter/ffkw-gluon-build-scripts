@@ -52,7 +52,7 @@ pipeline {
 
 
         		script {
-        			if($REMOTEKEYS){
+        			if("${REMOTEKEYS}" == "true"){
       					
         				$REMOTE_MAINTENANCE = "-remote"
         				sh "${DIR_SCRIPTS}/remote-maintenance/remote-maintenance.pl gluon/site/site.conf"
