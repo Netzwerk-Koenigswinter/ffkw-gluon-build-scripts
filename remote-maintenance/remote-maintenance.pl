@@ -4,8 +4,9 @@
 #to add remote maintenance keys to  gluon config
 #files.
 
-$KEYFILE = "authorised-keys";
+use File::Basename;
 
+$KEYFILE = dirname(__FILE__)."/authorised-keys";
 
 my $confPath = $ARGV[0];
 

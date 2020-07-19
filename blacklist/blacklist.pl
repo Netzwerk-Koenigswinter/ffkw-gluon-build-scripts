@@ -4,7 +4,9 @@
 #to remove unsopported devices from the gluon config
 #files.
 
-$BLACKLISTFILE = "blacklist";
+use File::Basename;
+
+$BLACKLISTFILE = dirname(__FILE__)."/blacklist";
 
 
 my $confPath = $ARGV[0];
