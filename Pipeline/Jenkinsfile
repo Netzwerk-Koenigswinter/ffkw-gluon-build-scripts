@@ -2,13 +2,14 @@ pipeline {
     agent { label 'master' }
 
     environment{
-        REPO_SCRIPTS = "https://git.teajay.cc/teajay/FFKW-Jenkins-Scripte"
+        REPO_SCRIPTS = "https://github.com/Netzwerk-Koenigswinter/ffkw-gluon-build-scripts.git"
         REPO_GLUON = "https://github.com/freifunk-gluon/gluon.git"
-        REPO_SITE = "https://git.teajay.cc/teajay/FFKW-Site-Multidomain.git"
+        REPO_SITE = "https://github.com/Netzwerk-Koenigswinter/site-ffkw-multidomain.git"
 
         DIR_SCRIPTS = "scrpt"
         DATE = sh(returnStdout: true, script: "date '+%Y%m%d-%H%M'").trim()
         SIGN_SECRET = "/gluon-secret/secret"
+        REMOTE_MAINTENANCE = ""
     }
 
     stages {
@@ -38,9 +39,23 @@ pipeline {
                 
                 echo "Checking out site config"
                 dir("gluon/site"){
-                    sh "git clone ${REPO_SITE} -b ${BRANCH} ."
+                    sh "git clone ${REPO_SITE} -b ${VPN}-${BRANCH} ."
                 }
             }
+        }
+
+        stage('config'){
+        	steps{
+        		script {
+        			if($REMOTEKEYS){
+        				$REMOTE_MAINTENANCE = "-remote"
+        				sh "${DIR_SCRIPTS}/remote-maintenance/remote-maintenance.pl gluon/site/site.conf"
+        				
+        			}
+        		}
+
+        		sh "${DIR_SCRIPTS}/blacklist/blacklist.pl gluon/targets/"
+        	}
         }
 
         stage('build'){
@@ -50,10 +65,10 @@ pipeline {
 					sh """ 
 						make update
 						for TARGET in \$(make list-targets); do
-							 make GLUON_TARGET=\$TARGET GLUON_RELEASE=${VERSION}-wireguard GLUON_BRANCH=${BRANCH} DEFAULT_GLUON_RELEASE=${VERSION}${DATE}
+							 make GLUON_TARGET=\$TARGET GLUON_RELEASE=${VERSION}-${VPN}${REMOTE_MAINTENANCE} GLUON_BRANCH=${BRANCH}${REMOTE_MAINTENANCE} DEFAULT_GLUON_RELEASE=${VERSION}${DATE}${REMOTE_MAINTENANCE}
 						done
-                        make manifest GLUON_BRANCH=${BRANCH} GLUON_RELEASE=${VERSION}-wireguard
-                        contrib/sign.sh ${SIGN_SECRET} output/images/sysupgrade/${BRANCH}.manifest
+                        make manifest GLUON_BRANCH=${BRANCH}${REMOTE_MAINTENANCE} GLUON_RELEASE=${VERSION}-${VPN}${REMOTE_MAINTENANCE}
+                        contrib/sign.sh ${SIGN_SECRET} output/images/sysupgrade/${BRANCH}${REMOTE_MAINTENANCE}.manifest
 					"""
 
                 }
