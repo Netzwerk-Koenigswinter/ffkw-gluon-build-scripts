@@ -9,7 +9,6 @@ pipeline {
         DIR_SCRIPTS = "scrpt"
         DATE = sh(returnStdout: true, script: "date '+%Y%m%d-%H%M'").trim()
         SIGN_SECRET = "/gluon-secret/secret"
-        REMOTE_MAINTENANCE = ""
     }
 
     stages {
@@ -51,10 +50,13 @@ pipeline {
                 echo "############################"
 
 
+
+
         		script {
+        			env.REMOTE_MAINTENANCE = ""
         			if("${REMOTEKEYS}" == "true"){
       					
-        				$REMOTE_MAINTENANCE = "-remote"
+        				env.REMOTE_MAINTENANCE = "-remote"
         				sh "${DIR_SCRIPTS}/remote-maintenance/remote-maintenance.pl gluon/site/site.conf"
         				
         				echo "Remote Maintenance Activated"
