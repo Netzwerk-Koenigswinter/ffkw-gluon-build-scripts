@@ -82,11 +82,11 @@ pipeline {
 						FAILEDTARGETS=\"\"
 						make update -j12
 						for TARGET in \$(make list-targets); do
-							 make GLUON_TARGET=\$TARGET GLUON_RELEASE=${VERSION}-${VPN}${REMOTE_MAINTENANCE} GLUON_BRANCH=${BRANCH}${REMOTE_MAINTENANCE} DEFAULT_GLUON_RELEASE=${VERSION}${DATE}${REMOTE_MAINTENANCE} -j12 || FAILEDTARGETS += \"\$TARGET \"
+							 make GLUON_TARGET=\$TARGET GLUON_RELEASE=${VERSION}-${VPN}${REMOTE_MAINTENANCE} GLUON_BRANCH=${BRANCH}${REMOTE_MAINTENANCE} DEFAULT_GLUON_RELEASE=${VERSION}${DATE}${REMOTE_MAINTENANCE} -j12 || FAILEDTARGETS=\"\$FAILEDTARGETS\$TARGET, \"
 						done
                         make manifest GLUON_BRANCH=${BRANCH}${REMOTE_MAINTENANCE} GLUON_RELEASE=${VERSION}-${VPN}${REMOTE_MAINTENANCE}
                         contrib/sign.sh ${SIGN_SECRET} output/images/sysupgrade/${BRANCH}${REMOTE_MAINTENANCE}.manifest
-                        if [ \$FAILEDTARGETS != \"\" ]
+                        if [ \$FAILEDTARGETS!=\"\" ]
 						then 
     						echo \"The Following Targets did not build succesfull: \$FAILEDTARGETS\"
 						fi
