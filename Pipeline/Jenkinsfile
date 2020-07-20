@@ -86,8 +86,7 @@ pipeline {
                         contrib/sign.sh ${SIGN_SECRET} output/images/sysupgrade/${BRANCH}${REMOTE_MAINTENANCE}.manifest
                         if [ $error ]
 						then 
-    						echo "Some Targets Failed"
-    						exit -1
+    						echo "Some Targets did not Build succesfully"
 						fi
 					"""
 
