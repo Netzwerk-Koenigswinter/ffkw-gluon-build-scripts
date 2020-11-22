@@ -5,10 +5,19 @@ import os
 from shutil import copyfile
 
 
-dmnlst = "domainlist"
+dmnlst = "domainlist.csv"
 masterConfig = "ortschaft.conf"
-replaceFlag = "Ortschaft"
+nameFlag = "Ortschaft"
+ssidFlag = "OrtschaftSSID"
 out = "Configs"
+
+def asciistring(s):
+    s = s.replace(" ", "_")
+    s = s.replace("ß", "ss")
+    s = s.replace("ö", "oe")
+    s = s.replace("ü", "ue")
+    s = s.replace("ä", "ae")
+    return s.lower()
 
 path = os.path.dirname(__file__)
 
@@ -20,10 +29,17 @@ if not os.path.exists(path + "/" + out):
 
 for i in domains:
 
-	newConfPath = path + "/" + out + "/" + i.lower() + ".conf"
+    name, ssid = i.split(",")
 
-	copyfile(path + "/" + masterConfig, newConfPath )
-	
-	with fileinput.FileInput(newConfPath, inplace=True) as file:
-		for line in file:
-			print(line.replace(replaceFlag.lower(), i.lower()).replace(replaceFlag, i), end='')
+    newConfPath = path + "/" + out + "/" + asciistring(name) + ".conf"
+    print(masterConfig, newConfPath)
+    copyfile(path + "/" + masterConfig, newConfPath)
+
+    with fileinput.FileInput(newConfPath, inplace=True) as file:
+        for line in file:
+
+            out_line = line.replace(ssidFlag, ssid)
+            out_line = out_line.replace(nameFlag.lower(), asciistring(name))
+            out_line = out_line.replace(nameFlag, name)
+
+            print(out_line, end='')

@@ -11,6 +11,7 @@ $BLACKLISTFILE = dirname(__FILE__)."/blacklist";
 
 my $confPath = $ARGV[0];
 
+
 #Reading in the Blacklist File to get banned devices
 open(my $fh, '<:encoding(UTF-8)', $BLACKLISTFILE);
 my @devices = <$fh>;
@@ -28,7 +29,7 @@ closedir $dir;
 
 #Scan Files for device Definitions
 foreach my $file (@files){
-	
+
 	my @lines2Remove;
 
 	open(my $fh2, '<:encoding(UTF-8)', $confPath.$file) or die "Cannot read file: $!";
@@ -40,11 +41,10 @@ foreach my $file (@files){
 		if($lines[$i] =~ /^device/){
 			foreach my $dev (@devices){
 				if($lines[$i] =~ $dev){
-					#print  $file, ": ", $lines[$i];
 					push @lines2Remove, $i;
 				}
 			}
-			
+
 		}
 	}
 
