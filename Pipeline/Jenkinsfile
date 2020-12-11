@@ -44,53 +44,61 @@ pipeline {
         }
 
         stage('config'){
-        	steps{
-        		echo "############################"
+            steps{
+                echo "############################"
                 echo "#  Running Config Scripts  #"
                 echo "############################"
 
 
 
 
-        		script {
-        			env.REMOTE_MAINTENANCE = ""
-        			if("${REMOTEKEYS}" == "true"){
+                script {
+                    env.REMOTE_MAINTENANCE = ""
+                    if("${REMOTEKEYS}" == "true"){
 
-        				env.REMOTE_MAINTENANCE = "-remote"
-        				sh "${DIR_SCRIPTS}/remote-maintenance/remote-maintenance.pl gluon/site/site.conf"
+                        env.REMOTE_MAINTENANCE = "-remote"
+                        sh "${DIR_SCRIPTS}/remote-maintenance/remote-maintenance.pl gluon/site/site.conf"
 
-        				echo "Remote Maintenance Activated"
+                        echo "Remote Maintenance Activated"
 
-        			}
-        		}
+                    }
+                }
 
-        		sh "${DIR_SCRIPTS}/blacklist/blacklist.pl gluon/targets/"
-        	}
+                sh "${DIR_SCRIPTS}/blacklist/blacklist.pl gluon/targets/"
+            }
         }
 
         stage('build'){
             steps{
 
-            	echo "##############"
-            	echo "#  Building  #"
-            	echo "##############"
+                echo "##############"
+                echo "#  Building  #"
+                echo "##############"
 
                 dir("gluon"){
 
-					sh """
-					    #!/usr/bin/env bash
-						FAILEDTARGETS=\"\"
-						make update -j12
-						for TARGET in \$(make list-targets); do
-							 make GLUON_TARGET=\$TARGET GLUON_RELEASE=${VERSION}-${VPN}${REMOTE_MAINTENANCE} GLUON_BRANCH=${BRANCH}${REMOTE_MAINTENANCE} DEFAULT_GLUON_RELEASE=${VERSION}${DATE}${REMOTE_MAINTENANCE} -j12 || FAILEDTARGETS=\"\$FAILEDTARGETS\$TARGET, \"
-						done
+                    sh """
+                        #!/usr/bin/env bash
+                        FAILEDTARGETS=\"\"
+                        make update -j12
+
+                        TARGETCONFIG=${TARGETCONFIG}
+                        if [ -z \"TARGETCONFIG\" ]
+                        then
+                            make GLUON_TARGET=\$TARGETCONFIG GLUON_RELEASE=${VERSION}-${VPN}${REMOTE_MAINTENANCE} GLUON_BRANCH=${BRANCH}${REMOTE_MAINTENANCE} DEFAULT_GLUON_RELEASE=${VERSION}${DATE}${REMOTE_MAINTENANCE} -j12 || FAILEDTARGETS=\"\$FAILEDTARGETS\$TARGETCONFIG, \"
+                        else
+                            for TARGET in \$(make list-targets); do
+                                make GLUON_TARGET=\$TARGET GLUON_RELEASE=${VERSION}-${VPN}${REMOTE_MAINTENANCE} GLUON_BRANCH=${BRANCH}${REMOTE_MAINTENANCE} DEFAULT_GLUON_RELEASE=${VERSION}${DATE}${REMOTE_MAINTENANCE} -j12 || FAILEDTARGETS=\"\$FAILEDTARGETS\$TARGET, \"
+                            done
+                        fi
+                        
                         make manifest GLUON_BRANCH=${BRANCH}${REMOTE_MAINTENANCE} GLUON_RELEASE=${VERSION}-${VPN}${REMOTE_MAINTENANCE}
                         contrib/sign.sh ${SIGN_SECRET} output/images/sysupgrade/${BRANCH}${REMOTE_MAINTENANCE}.manifest
                         if [ \$FAILEDTARGETS!=\"\" ]
-						then
-    						echo \"The Following Targets did not build succesfull: \$FAILEDTARGETS\"
-						fi
-					"""
+                        then
+                            echo \"The Following Targets did not build succesfull: \$FAILEDTARGETS\"
+                        fi
+                    """
 
                 }
             }
