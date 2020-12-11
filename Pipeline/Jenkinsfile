@@ -83,7 +83,7 @@ pipeline {
                         make update -j12
 
                         TARGETCONFIG=${TARGETCONFIG}
-                        if [ -z \"TARGETCONFIG\" ]
+                        if [ ! -z \"$TARGETCONFIG\" ]
                         then
                             make GLUON_TARGET=\$TARGETCONFIG GLUON_RELEASE=${VERSION}-${VPN}${REMOTE_MAINTENANCE} GLUON_BRANCH=${BRANCH}${REMOTE_MAINTENANCE} DEFAULT_GLUON_RELEASE=${VERSION}${DATE}${REMOTE_MAINTENANCE} -j12 || FAILEDTARGETS=\"\$FAILEDTARGETS\$TARGETCONFIG, \"
                         else
