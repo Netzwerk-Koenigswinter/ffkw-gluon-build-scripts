@@ -17,7 +17,7 @@ pipeline {
                 echo "########################"
                 echo "#  Cleaning Workspace  #"
                 echo "########################"
-                sh "rm -r -f ./*"
+                //sh "rm -r -f ./*"
             }
         }
 
