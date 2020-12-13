@@ -36,9 +36,12 @@ pipeline {
                 echo "Checking out gluon version ${VERSION}"
                 sh "git clone ${REPO_GLUON} gluon -b ${VERSION} || true"
 
-                echo "Checking out site config"
+                echo "Checking out site config, always update from git"
                 dir("gluon/site"){
                     sh "git clone ${REPO_SITE} -b ${VPN}-${BRANCH} . || true"
+                    sh "git fetch --all || true"
+                    sh "git reset --hard origin/${VPN}-${BRANCH} || true"
+                    sh "git pull || true"
                 }
             }
         }
