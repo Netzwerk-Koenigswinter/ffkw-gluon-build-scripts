@@ -27,10 +27,10 @@ close($fh);
 open($fh, '>' , $confPath) or die "Cannot write File: $!";
 
 foreach my $line (@confLines){
-	print $fh $line;
-	if($line =~ /-- REMOTE KEY MARKER --/){
-		print $fh $keyText;
-	}
+    print $fh $line;
+    if($line =~ /-- REMOTE KEY MARKER --/){
+        print $fh $keyText;
+    }
 }
 
 close($fh);

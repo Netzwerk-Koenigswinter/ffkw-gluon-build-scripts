@@ -2,9 +2,8 @@ pipeline {
     agent { label 'master' }
 
     environment{
-        REPO_SCRIPTS = "https://github.com/Netzwerk-Koenigswinter/ffkw-gluon-build-scripts.git"
         REPO_GLUON = "https://github.com/freifunk-gluon/gluon.git"
-        REPO_SITE = "https://github.com/Netzwerk-Koenigswinter/site-ffkw-multidomain.git"
+        REPO_SITE = "https://github.com/divonet/site-multidomain.git"
 
         DIR_SCRIPTS = "scrpt"
         DATE = sh(returnStdout: true, script: "date '+%Y%m%d-%H%M'").trim()
@@ -27,14 +26,11 @@ pipeline {
                 echo "#  Cloning Repos  #"
                 echo "###################"
 
-
-                echo "Checking out build scripts"
-                dir("${DIR_SCRIPTS}"){
-                    git "${REPO_SCRIPTS}"
-                }
-
-                echo "Checking out gluon version ${VERSION}"
-                sh "git clone ${REPO_GLUON} gluon -b ${VERSION} || true"
+                echo "Checking out gluon version ${GLUON_VERSION}"
+                sh "git clone ${REPO_GLUON} gluon -b ${GLUON_VERSION} || true"
+                sh "git fetch --all || true"
+                sh "git reset --hard origin/${GLUON_VERSION} || true"
+                sh "git pull || true"
 
                 echo "Checking out site config, always update from git"
                 dir("gluon/site"){
@@ -52,22 +48,19 @@ pipeline {
                 echo "#  Running Config Scripts  #"
                 echo "############################"
 
-
-
-
                 script {
                     env.REMOTE_MAINTENANCE = ""
                     if("${REMOTEKEYS}" == "true"){
 
                         env.REMOTE_MAINTENANCE = "-remote"
-                        sh "${DIR_SCRIPTS}/remote-maintenance/remote-maintenance.pl gluon/site/site.conf"
+                        sh "remote-maintenance/remote-maintenance.pl gluon/site/site.conf"
 
                         echo "Remote Maintenance Activated"
 
                     }
                 }
 
-                sh "${DIR_SCRIPTS}/blacklist/blacklist.pl gluon/targets/"
+                sh "blacklist/blacklist.pl gluon/targets/"
             }
         }
 
@@ -88,18 +81,18 @@ pipeline {
                         TARGETCONFIG=${TARGETCONFIG}
                         if [ ! -z \"$TARGETCONFIG\" ]
                         then
-                            make GLUON_TARGET=\$TARGETCONFIG GLUON_RELEASE=${VERSION}-${VPN}${REMOTE_MAINTENANCE} GLUON_BRANCH=${BRANCH}${REMOTE_MAINTENANCE} DEFAULT_GLUON_RELEASE=${VERSION}${DATE}${REMOTE_MAINTENANCE} ${DEBUGBUILDPARAM} || FAILEDTARGETS=\"\$FAILEDTARGETS\$TARGETCONFIG, \"
+                            make GLUON_TARGET=\$TARGETCONFIG GLUON_RELEASE=${GLUON_VERSION}-${VPN}${REMOTE_MAINTENANCE} GLUON_BRANCH=${BRANCH}${REMOTE_MAINTENANCE} DEFAULT_GLUON_RELEASE=${GLUON_VERSION}${DATE}${REMOTE_MAINTENANCE} ${DEBUGBUILDPARAM} || FAILEDTARGETS=\"\$FAILEDTARGETS\$TARGETCONFIG, \"
                         else
                             for TARGET in \$(make list-targets); do
-                                make GLUON_TARGET=\$TARGET GLUON_RELEASE=${VERSION}-${VPN}${REMOTE_MAINTENANCE} GLUON_BRANCH=${BRANCH}${REMOTE_MAINTENANCE} DEFAULT_GLUON_RELEASE=${VERSION}${DATE}${REMOTE_MAINTENANCE} -j12 || FAILEDTARGETS=\"\$FAILEDTARGETS\$TARGET, \"
+                                make GLUON_TARGET=\$TARGET GLUON_RELEASE=${GLUON_VERSION}-${VPN}${REMOTE_MAINTENANCE} GLUON_BRANCH=${BRANCH}${REMOTE_MAINTENANCE} DEFAULT_GLUON_RELEASE=${GLUON_VERSION}${DATE}${REMOTE_MAINTENANCE} ${DEBUGBUILDPARAM} || FAILEDTARGETS=\"\$FAILEDTARGETS\$TARGET, \"
                             done
                         fi
                         
-                        make manifest GLUON_BRANCH=${BRANCH}${REMOTE_MAINTENANCE} GLUON_RELEASE=${VERSION}-${VPN}${REMOTE_MAINTENANCE}
+                        make manifest GLUON_BRANCH=${BRANCH}${REMOTE_MAINTENANCE} GLUON_RELEASE=${GLUON_VERSION}-${VPN}${REMOTE_MAINTENANCE}
                         contrib/sign.sh ${SIGN_SECRET} output/images/sysupgrade/${BRANCH}${REMOTE_MAINTENANCE}.manifest
                         if [ \$FAILEDTARGETS!=\"\" ]
                         then
-                            echo \"The Following Targets did not build succesfull: \$FAILEDTARGETS\"
+                            echo \"The following targets did not build succesfull: \$FAILEDTARGETS\"
                         fi
                     """
 
