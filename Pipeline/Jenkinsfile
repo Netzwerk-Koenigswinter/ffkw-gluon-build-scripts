@@ -34,11 +34,11 @@ pipeline {
                 }
 
                 echo "Checking out gluon version ${VERSION}"
-                sh "git clone ${REPO_GLUON} gluon -b ${VERSION}"
+                sh "git clone ${REPO_GLUON} gluon -b ${VERSION} || true"
 
                 echo "Checking out site config"
                 dir("gluon/site"){
-                    sh "git clone ${REPO_SITE} -b ${VPN}-${BRANCH} ."
+                    sh "git clone ${REPO_SITE} -b ${VPN}-${BRANCH} . || true"
                 }
             }
         }
