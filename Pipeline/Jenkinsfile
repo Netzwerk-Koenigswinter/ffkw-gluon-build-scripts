@@ -13,10 +13,10 @@ pipeline {
     stages {
         stage('tmpclean'){
             steps{
-                echo "########################"
-                echo "#  Cleaning Workspace  #"
-                echo "########################"
-                //sh "rm -r -f ./*"
+                echo "#####################"
+                echo "#  Cleaning Output  #"
+                echo "#####################"
+                sh "rm -rf ./gluon/output"
             }
         }
 
@@ -101,15 +101,5 @@ pipeline {
                 }
             }
         }
-
-        stage('clean'){
-            steps{
-                echo "########################"
-                echo "#  Cleaning Workspace  #"
-                echo "########################"
-                //sh "rm -r -f ./*"
-            }
-        }
-
     }
 }
