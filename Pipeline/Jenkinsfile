@@ -27,10 +27,12 @@ pipeline {
                 echo "###################"
 
                 echo "Checking out gluon version ${GLUON_VERSION}"
-                sh "git clone ${REPO_GLUON} gluon -b ${GLUON_VERSION} || true"
-                sh "git fetch --all || true"
-                sh "git reset --hard origin/${GLUON_VERSION} || true"
-                sh "git pull || true"
+                dir("gluon"){
+                    sh "git clone ${REPO_GLUON} -b ${GLUON_VERSION} . || true"
+                    sh "git fetch --all || true"
+                    sh "git reset --hard origin/${GLUON_VERSION} || true"
+                    sh "git pull || true"
+                }
 
                 echo "Checking out site config, always update from git"
                 dir("gluon/site"){
