@@ -31,7 +31,6 @@ pipeline {
                     sh "git clone ${REPO_GLUON} -b ${GLUON_VERSION} . || true"
                     sh "git fetch --all || true"
                     sh "git reset --hard ${GLUON_VERSION} || true"
-                    sh "git pull || true"
                 }
 
                 echo "Checking out site config, always update from git"
