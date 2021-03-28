@@ -30,7 +30,7 @@ pipeline {
                 dir("gluon"){
                     sh "git clone ${REPO_GLUON} -b ${GLUON_VERSION} . || true"
                     sh "git fetch --all || true"
-                    sh "git reset --hard origin/${GLUON_VERSION} || true"
+                    sh "git reset --hard ${GLUON_VERSION} || true"
                     sh "git pull || true"
                 }
 
