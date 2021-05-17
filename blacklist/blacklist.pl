@@ -30,54 +30,54 @@ closedir $dir;
 #Scan Files for device Definitions
 foreach my $file (@files){
 
-	my @lines2Remove;
+    my @lines2Remove;
 
-	open(my $fh2, '<:encoding(UTF-8)', $confPath.$file) or die "Cannot read file: $!";
-	my @lines = <$fh2>;
-	close($fh2);
+    open(my $fh2, '<:encoding(UTF-8)', $confPath.$file) or die "Cannot read file: $!";
+    my @lines = <$fh2>;
+    close($fh2);
 
-	foreach my $i (0..$#lines){
-		#print $lines[$i], "Hallo";
-		if($lines[$i] =~ /^device/){
-			foreach my $dev (@devices){
-				if($lines[$i] =~ $dev){
-					push @lines2Remove, $i;
-				}
-			}
+    foreach my $i (0..$#lines){
+        #print $lines[$i], "Hallo";
+        if($lines[$i] =~ /^device/){
+            foreach my $dev (@devices){
+                if($lines[$i] =~ $dev){
+                    push @lines2Remove, $i;
+                }
+            }
 
-		}
-	}
+        }
+    }
 
 
 
-	foreach my $i (reverse(@lines2Remove)){
-		removeBlock($i, \@lines);
-		#print join("\n",@lines);
-	}
+    foreach my $i (reverse(@lines2Remove)){
+        removeBlock($i, \@lines);
+        #print join("\n",@lines);
+    }
 
-	if($#lines2Remove + 1){
-		open(my $fh3, '>', $confPath.$file) or die "Cannot write File: $!";
-		print $fh3 join("\n", @lines)
-	}
+    if($#lines2Remove + 1){
+        open(my $fh3, '>', $confPath.$file) or die "Cannot write File: $!";
+        print $fh3 join("\n", @lines)
+    }
 
 }
 
 
 sub removeBlock {
-	my ($lineIndex, $lineRef) = (@_);
+    my ($lineIndex, $lineRef) = (@_);
 
-	my $bracketCount = 0;
-	my $curlBracketCount = 0;
+    my $bracketCount = 0;
+    my $curlBracketCount = 0;
 
-	do{
-		$bracketCount += (${$lineRef}[$lineIndex] =~ tr/\(//) - (${$lineRef}[$lineIndex] =~ tr/\)//);
-		$curlBracketCount += (${$lineRef}[$lineIndex] =~ tr/\{//) - (${$lineRef}[$lineIndex] =~ tr/\}//);
+    do{
+        $bracketCount += (${$lineRef}[$lineIndex] =~ tr/\(//) - (${$lineRef}[$lineIndex] =~ tr/\)//);
+        $curlBracketCount += (${$lineRef}[$lineIndex] =~ tr/\{//) - (${$lineRef}[$lineIndex] =~ tr/\}//);
 
-		#print "(): ", $bracketCount, "{}:", $curlBracketCount,"\n";
-		#print ${$lineRef}[$lineIndex];
-		splice(@{$lineRef}, $lineIndex, 1);
+        #print "(): ", $bracketCount, "{}:", $curlBracketCount,"\n";
+        #print ${$lineRef}[$lineIndex];
+        splice(@{$lineRef}, $lineIndex, 1);
 
-	}while($bracketCount != 0 or $curlBracketCount != 0);
+    }while($bracketCount != 0 or $curlBracketCount != 0);
 
 }
 
